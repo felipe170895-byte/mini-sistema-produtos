@@ -6,17 +6,46 @@ require_once __DIR__ . '/classes/Database.php';
 
 $conn = Database::conectar();
 
+$usuarioId = $_SESSION['usuario_id'];
+$nomeUsuario = $_SESSION['usuario_nome'] ?? 'Usuário';
+
 $totalFornecedores = 0;
 $totalProdutos = 0;
 $totalItensCesta = 0;
 $valorTotalCesta = 0;
+$erroDashboard = '';
 
 try {
+    // Total de fornecedores
     $stmt = $conn->query("SELECT COUNT(*) AS total FROM fornecedores");
     $totalFornecedores = $stmt->fetch()['total'];
 
+    // Total de produtos
     $stmt = $conn->query("SELECT COUNT(*) AS total FROM produtos");
     $totalProdutos = $stmt->fetch()['total'];
+
+    // Buscar cesta aberta do usuário
+    $sql = "
+        SELECT 
+            c.id AS cesta_id,
+            COUNT(ci.id) AS total_itens,
+            COALESCE(SUM(ci.preco_unitario), 0) AS valor_total
+        FROM cestas c
+        LEFT JOIN cesta_itens ci ON ci.cesta_id = c.id
+        WHERE c.usuario_id = ?
+        AND c.status = 'aberta'
+        GROUP BY c.id
+        LIMIT 1
+    ";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->execute([$usuarioId]);
+    $cesta = $stmt->fetch();
+
+    if ($cesta) {
+        $totalItensCesta = $cesta['total_itens'];
+        $valorTotalCesta = $cesta['valor_total'];
+    }
 
 } catch (PDOException $e) {
     $erroDashboard = $e->getMessage();
@@ -31,12 +60,19 @@ require_once __DIR__ . '/includes/navbar.php';
         <div>
             <h1 class="page-title mb-1">Dashboard</h1>
             <p class="text-muted mb-0">
-                Bem-vindo ao Mini Sistema de Gestão de Produtos.
+                Bem-vindo, <?= htmlspecialchars($nomeUsuario) ?>.
             </p>
+        </div>
+
+        <div>
+            <a href="cesta_visualizar.php" class="btn btn-outline-primary">
+                <i class="bi bi-cart3"></i>
+                Ver Minha Cesta
+            </a>
         </div>
     </div>
 
-    <?php if (isset($erroDashboard)): ?>
+    <?php if (!empty($erroDashboard)): ?>
         <div class="alert alert-danger">
             Erro ao carregar informações do dashboard: <?= htmlspecialchars($erroDashboard) ?>
         </div>
@@ -94,7 +130,9 @@ require_once __DIR__ . '/includes/navbar.php';
                     </div>
                     <div>
                         <p class="text-muted mb-0">Valor da Cesta</p>
-                        <h3 class="mb-0">R$ <?= number_format($valorTotalCesta, 2, ',', '.') ?></h3>
+                        <h3 class="mb-0">
+                            R$ <?= number_format((float) $valorTotalCesta, 2, ',', '.') ?>
+                        </h3>
                     </div>
                 </div>
             </div>
@@ -140,9 +178,18 @@ require_once __DIR__ . '/includes/navbar.php';
         </div>
     </div>
 
-    <div class="alert alert-info mt-4">
-        <strong>Observação:</strong> nesta etapa estamos testando apenas o layout base.
-        A autenticação real será ativada na próxima parte.
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Resumo do sistema</h5>
+
+            <p class="mb-2">
+                Este sistema permite gerenciar fornecedores, produtos e cestas de produtos.
+            </p>
+
+            <p class="mb-0 text-muted">
+                Use o menu superior para navegar entre as funcionalidades.
+            </p>
+        </div>
     </div>
 
 </div>
