@@ -1,0 +1,1 @@
+console.log('Arquivo ajax.js carregado com sucesso.');
