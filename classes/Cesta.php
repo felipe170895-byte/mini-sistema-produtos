@@ -166,4 +166,73 @@ class Cesta
 
        return $stmt->fetch();
    }
+
+   public function listarItens($usuarioId)
+   {
+       $cesta = $this->buscarCestaAberta($usuarioId);
+
+       if (!$cesta) {
+           return [];
+       }
+
+       $sql = "
+           SELECT
+               ci.id AS item_id,
+               ci.preco_unitario,
+               p.id AS produto_id,
+               p.nome AS produto_nome,
+               p.descricao,
+               f.nome AS fornecedor_nome
+           FROM cesta_itens ci
+           INNER JOIN produtos p ON p.id = ci.produto_id
+           INNER JOIN fornecedores f ON f.id = p.fornecedor_id
+           WHERE ci.cesta_id = ?
+           ORDER BY p.nome ASC
+       ";
+
+       $stmt = $this->conn->prepare($sql);
+       $stmt->execute([$cesta['id']]);
+
+       return $stmt->fetchAll();
+   }
+
+   public function removerItem($usuarioId, $itemId)
+   {
+       $cesta = $this->buscarCestaAberta($usuarioId);
+
+       if (!$cesta) {
+           return false;
+       }
+
+       $sql = "
+           DELETE FROM cesta_itens
+           WHERE id = ?
+           AND cesta_id = ?
+       ";
+
+       $stmt = $this->conn->prepare($sql);
+
+       return $stmt->execute([
+           $itemId,
+           $cesta['id']
+       ]);
+   }
+
+   public function limparCesta($usuarioId)
+   {
+       $cesta = $this->buscarCestaAberta($usuarioId);
+
+       if (!$cesta) {
+           return false;
+       }
+
+       $sql = "
+           DELETE FROM cesta_itens
+           WHERE cesta_id = ?
+       ";
+
+       $stmt = $this->conn->prepare($sql);
+
+       return $stmt->execute([$cesta['id']]);
+   }
 }
