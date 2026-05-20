@@ -286,48 +286,6 @@ O sistema possui os seguintes relacionamentos:
 
 ---
 
-## Diagrama Entidade Relacionamento
-
-O Diagrama Entidade Relacionamento do sistema está disponível abaixo:
-
-![DER do Sistema](docs/der/der-sistema.png)
-
----
-
-## Protótipos das Telas
-
-Os protótipos das telas foram desenvolvidos no Figma e exportados para a pasta `docs/figma`.
-
-### Tela de Login
-
-![Tela de Login](docs/figma/login.png)
-
-### Dashboard
-
-![Dashboard](docs/figma/dashboard.png)
-
-### Tela de Fornecedores
-
-![Fornecedores](docs/figma/fornecedores.png)
-
-### Tela de Produtos
-
-![Produtos](docs/figma/produtos.png)
-
-### Tela de Seleção de Produtos
-
-![Selecionar Produtos](docs/figma/selecionar-produtos.png)
-
-### Tela da Cesta
-
-![Cesta](docs/figma/cesta.png)
-
-### Painel AJAX
-
-![Painel AJAX](docs/figma/ajax.png)
-
----
-
 ## Como Executar o Projeto
 
 ### 1. Clonar o repositório
